@@ -1,1 +1,1 @@
-# OptimizeSchools 1
+# OptimizeSchools
