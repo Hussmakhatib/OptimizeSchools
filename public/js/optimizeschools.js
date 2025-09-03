@@ -1,129 +1,86 @@
-/* =========================================
-   OptimizeSchools – Base JS
-   public/js/optimizeschools.js
-   ========================================= */
+/* ===========================
+   One-Page Slider Helpers
+   =========================== */
+const $ = (s, ctx=document) => ctx.querySelector(s);
+const $$ = (s, ctx=document) => Array.from(ctx.querySelectorAll(s));
 
-// Helpers
-const $ = (sel, ctx=document) => ctx.querySelector(sel);
-const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
-const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
-const delegate = (root, ev, sel, fn) =>
-  on(root, ev, e => { const m = e.target.closest(sel); if (m && root.contains(m)) fn(e, m); });
+document.addEventListener('DOMContentLoaded', () => {
+  const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 125;
+  const sections = $$('.section[id]');
+  const navLinks = $$('.navlinks a[href^="#"]');
+  const slider = $('.slider');
 
-const ready = (fn) => document.readyState !== 'loading' ? fn() : document.addEventListener('DOMContentLoaded', fn);
+  /* 1) Smooth anchor navigation (with header offset safety for browsers ignoring scroll-padding) */
+  navLinks.forEach(a => {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href');
+      if (!id.startsWith('#')) return;
+      const target = $(id);
+      if (!target) return;
+      e.preventDefault();
 
-// Smooth scroll for anchor links
-function enableSmoothScroll() {
-  delegate(document, 'click', 'a[href^="#"]', (e, a) => {
-    const id = a.getAttribute('href');
-    if (id.length > 1) {
-      const el = $(id);
-      if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      const top = target.getBoundingClientRect().top + window.scrollY - headerH + 1;
+      window.scrollTo({ top, behavior: 'smooth' });
+
+      // If slider container is used (recommended), scroll it instead of window:
+      if (slider && slider.contains(target)) {
+        const y = target.offsetTop; // inside slider
+        slider.scrollTo({ top: y, behavior: 'smooth' });
+      }
+      history.replaceState(null, '', id);
+    });
+  });
+
+  /* 2) Highlight active nav link while scrolling */
+  const byId = link => link.getAttribute('href');
+  const setActive = (id) => {
+    navLinks.forEach(a => a.classList.toggle('is-active', byId(a) === id));
+    // a11y hint
+    navLinks.forEach(a => a.removeAttribute('aria-current'));
+    const active = navLinks.find(a => byId(a) === id);
+    if (active) active.setAttribute('aria-current', 'page');
+  };
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        setActive('#' + entry.target.id);
+      }
+    });
+  }, { root: slider || null, threshold: 0.6 });
+  sections.forEach(sec => io.observe(sec));
+
+  /* 3) Optional: snap assist on wheel for older browsers (kept subtle) */
+  let lock = false;
+  const snapTo = (dir) => {
+    if (lock) return; lock = true;
+    const current = sections.find(s => s.classList.contains('is-current')) ||
+                    sections.reduce((closest, s) => {
+                      const b = s.getBoundingClientRect();
+                      return (Math.abs(b.top - headerH) < Math.abs((closest?.getBoundingClientRect().top ?? Infinity) - headerH)) ? s : closest;
+                    }, null);
+
+    const idx = sections.indexOf(current);
+    const nextIdx = Math.min(sections.length - 1, Math.max(0, idx + dir));
+    const target = sections[nextIdx];
+    if (target && target !== current) {
+      (slider || window).scrollTo({ top: (slider ? target.offsetTop : target.offsetTop + window.scrollY - headerH), behavior: 'smooth' });
+      setActive('#' + target.id);
     }
-  });
-}
+    setTimeout(() => (lock = false), 450);
+  };
 
-// Mobile nav toggle
-function initMobileNav() {
-  const btn = $('[data-nav-toggle]');
-  const list = $('.navlinks');
-  if (!btn || !list) return;
-  on(btn, 'click', () => {
-    list.classList.toggle('is-open');
-    btn.setAttribute('aria-expanded', list.classList.contains('is-open'));
-  });
-}
+  // Mark current via IO callback by toggling class
+  const io2 = new IntersectionObserver((entries) => {
+    entries.forEach(e => e.target.classList.toggle('is-current', e.isIntersecting));
+  }, { root: slider || null, threshold: 0.6 });
+  sections.forEach(sec => io2.observe(sec));
 
-// Accordion
-function initAccordion() {
-  $$('.accordion').forEach(acc => {
-    delegate(acc, 'click', '[data-accordion-button]', (e, btn) => {
-      const panel = btn.closest('[data-accordion]').querySelector('[data-accordion-panel]');
-      const open = panel.classList.toggle('is-open');
-      btn.setAttribute('aria-expanded', open);
-    });
-  });
-}
-
-// Tabs (ARIA)
-function initTabs() {
-  $$('.tabs').forEach(tabset => {
-    const tabs = $$('[role="tab"]', tabset);
-    const panels = $$('[role="tabpanel"]', tabset);
-    tabs.forEach((t, i) => {
-      on(t, 'click', () => {
-        tabs.forEach(tt => tt.setAttribute('aria-selected','false'));
-        panels.forEach(p => p.hidden = true);
-        t.setAttribute('aria-selected','true');
-        panels[i].hidden = false;
-      });
-    });
-  });
-}
-
-// Modal
-function initModals() {
-  delegate(document, 'click', '[data-modal-open]', (e, btn) => {
-    e.preventDefault();
-    const target = btn.getAttribute('data-modal-open');
-    const modal = $(target);
-    if (modal) modal.classList.add('is-open');
-  });
-  delegate(document, 'click', '[data-modal-close]', (e, btn) => {
-    const modal = btn.closest('.modal');
-    if (modal) modal.classList.remove('is-open');
-  });
-  // click outside to close
-  delegate(document, 'click', '.modal', (e, wrap) => {
-    if (e.target === wrap) wrap.classList.remove('is-open');
-  });
-}
-
-// Basic form validation (required fields)
-function initForms() {
-  $$('form[data-validate]').forEach(form => {
-    on(form, 'submit', (e) => {
-      let valid = true;
-      $$('[required]', form).forEach(inp => {
-        const msg = inp.closest('label, .field')?.querySelector('.form-error');
-        if (!inp.value.trim()) {
-          valid = false;
-          inp.setAttribute('aria-invalid','true');
-          if (msg) { msg.style.display = 'block'; msg.textContent = 'This field is required.'; }
-        } else {
-          inp.removeAttribute('aria-invalid');
-          if (msg) msg.style.display = 'none';
-        }
-      });
-      if (!valid) e.preventDefault();
-    });
-  });
-}
-
-// Tiny toast
-function toast(message, timeout=3000) {
-  let el = $('#toast');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'toast';
-    el.style.position='fixed'; el.style.bottom='18px'; el.style.left='50%';
-    el.style.transform='translateX(-50%)'; el.style.background='#0d3b66';
-    el.style.color='#fff'; el.style.padding='10px 14px'; el.style.borderRadius='10px';
-    el.style.boxShadow='0 8px 30px rgba(0,0,0,.1)'; el.style.zIndex='9999';
-    document.body.appendChild(el);
-  }
-  el.textContent = message;
-  el.style.opacity = '1';
-  setTimeout(() => el.style.opacity = '0', timeout);
-}
-
-// Init all
-ready(() => {
-  enableSmoothScroll();
-  initMobileNav();
-  initAccordion();
-  initTabs();
-  initModals();
-  initForms();
-  // Example: toast('Welcome to OptimizeSchools');
+  // Only enable snap assist if user is scrolling inside the slider
+  (slider || window).addEventListener('wheel', (e) => {
+    if (!e.ctrlKey && Math.abs(e.deltaY) > 28) {
+      // Allow normal free scroll; uncomment for stronger snapping:
+      // snapTo(e.deltaY > 0 ? +1 : -1);
+    }
+  }, { passive: true });
 });
