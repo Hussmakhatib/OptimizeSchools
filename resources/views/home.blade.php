@@ -5,12 +5,13 @@
 
 @section('content')
   <!-- HERO -->
-  <section class="container grid grid-2" style="padding:64px 0;">
-    <div class="card">
+  <section class="container grid grid-2 stack">
+    <div class="card stack">
       <span class="pill">Education • Cost Optimization</span>
       <h1>Helping Schools Cut Costs with Smarter Technology</h1>
       <p class="lead">We help schools reduce IT and operational costs by <strong>20–30%</strong> without sacrificing quality — through audits, cloud migration, digital workflows, and smart vendor strategies.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+
+      <div class="list" style="grid-template-columns:auto auto; gap:10px;">
         <a class="btn" href="{{ route('contact') }}">Book a Free Consultation</a>
         <a class="btn secondary" href="{{ route('leadmagnet') }}">Get the Free Checklist</a>
       </div>
@@ -95,12 +96,12 @@
 
   <!-- Final CTA -->
   <section class="container">
-    <div class="card" style="display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap">
-      <div>
+    <div class="card grid">
+      <div class="stack">
         <h2>Ready to see how much you could save?</h2>
         <p class="muted">Book a free 15-minute consultation or download the checklist to start now.</p>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div class="list" style="grid-template-columns:auto auto; gap:10px;">
         <a class="btn" href="{{ route('contact') }}">Book a Call</a>
         <a class="btn secondary" href="{{ route('leadmagnet') }}">Download Checklist</a>
       </div>
