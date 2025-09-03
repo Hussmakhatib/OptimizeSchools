@@ -8,6 +8,7 @@
   <meta name="description" content="@yield('meta_description','Helping schools cut costs with smarter technology')">
   <meta name="theme-color" content="#0d3b66">
   <link rel="stylesheet" href="{{ asset('css/optimizeschools.css') }}">
+  <link rel="icon" href="data:,">
 </head>
 <body>
   <header>
