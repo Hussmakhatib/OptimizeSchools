@@ -2,17 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+Route::view('/', 'home')->name('home');
 
-Route::get('/', function () {
-    return view('home');
-});
+// Stubs for now (we’ll build pages next)
+Route::view('/services', 'stubs.services')->name('services.index');
+Route::view('/results', 'stubs.cases')->name('cases.index');
+Route::view('/about', 'stubs.about')->name('about');
+Route::view('/resources', 'stubs.resources')->name('resources.index');
+Route::view('/lead-magnet', 'stubs.leadmagnet')->name('leadmagnet');
+Route::view('/contact', 'stubs.contact')->name('contact');
