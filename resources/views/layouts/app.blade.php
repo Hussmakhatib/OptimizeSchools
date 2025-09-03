@@ -9,8 +9,11 @@
   <meta name="theme-color" content="#0d3b66">
   <link rel="stylesheet" href="{{ asset('css/optimizeschools.css') }}">
   <link rel="icon" href="data:,">
+  @stack('styles')
 </head>
 <body>
+  <script src="{{ asset('js/optimizeschools.js') }}" defer></script>
+  @stack('scripts')
   <header>
     <div class="container nav" aria-label="Primary">
       <div class="brand">
