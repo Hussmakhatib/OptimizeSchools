@@ -30,10 +30,22 @@ html{scroll-behavior:smooth; scroll-padding-top: var(--header-h);}
 .muted{color:var(--muted)}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;background:var(--brand);
-  color:#fff;border:none;padding:12px 18px;border-radius:12px;cursor:pointer;text-decoration:none
+  color:#fff !important;border:none;padding:12px 18px;border-radius:12px;cursor:pointer;text-decoration:none;
 }
-.btn.secondary{background:#eaf2ff;color:var(--brand)}
+.btn.secondary{background:#038e36;color:var(--brand)}
 .btn:focus{outline:3px solid var(--ring);outline-offset:2px}
+.btn-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;  /* 2 equal columns */
+  gap: 10px;
+  width: 100%;
+  max-width: 500px;  /* optional: cap the total width */
+}
+
+.btn-group .btn {
+  width: 100%;    /* stretch to fill column */
+  justify-content: center;
+}
 .pill{
   display:inline-block;padding:6px 10px;border-radius:999px;background:#eef6ff;
   color:var(--brand);font-weight:600;font-size:13px

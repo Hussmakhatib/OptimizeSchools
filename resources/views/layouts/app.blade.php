@@ -29,7 +29,7 @@
         <a href="#results">Results</a>
         <a href="#about">About</a>
         <a href="#resources">Resources</a>
-        <a class="btn" href="#contact">Book a Call</a>
+        <a class="btn" href="#contact">Book a Free Consultation</a>
       </nav>
     </div>
   </header>

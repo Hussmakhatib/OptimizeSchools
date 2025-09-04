@@ -14,7 +14,7 @@
             <span class="pill">Education • Cost Optimization</span>
             <h1>Helping Schools Cut Costs with Smarter Technology</h1>
             <p class="lead">We help schools reduce IT and operational costs by <strong>20–30%</strong> without sacrificing quality — through audits, cloud migration, digital workflows, and smart vendor strategies.</p>
-            <div class="stack" style="display:grid;grid-auto-flow:column;grid-auto-columns:max-content;gap:10px;">
+            <div class="btn-group">
               <a class="btn" href="#contact">Book a Free Consultation</a>
               <a class="btn secondary" href="#resources">Get the Free Checklist</a>
             </div>
