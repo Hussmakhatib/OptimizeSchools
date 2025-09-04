@@ -6,9 +6,8 @@
 @section('content')
   <!-- The scrollable slider viewport (below the fixed 125px header) -->
   <div class="slider">
-
     <!-- HOME -->
-    <section id="home" class="section">
+    <section id="home" class="section section--center">
       <div class="section-inner">
         <div class="container">
           <div class="card stack">
@@ -19,7 +18,6 @@
               <a class="btn" href="#contact">Book a Free Consultation</a>
               <a class="btn secondary" href="#resources">Get the Free Checklist</a>
             </div>
-
             <div class="kpis" aria-label="Mini case studies">
               <div class="card">
                 <b>Printing Costs ↓ 80%</b>
@@ -41,7 +39,6 @@
         </div>
       </div>
     </section>
-
     <!-- SERVICES -->
     <section id="services" class="section">
       <div class="section-inner">
@@ -60,7 +57,6 @@
         </div>
       </div>
     </section>
-
     <!-- RESULTS -->
     <section id="results" class="section">
       <div class="section-inner">
@@ -86,7 +82,6 @@
         </div>
       </div>
     </section>
-
     <!-- ABOUT -->
     <section id="about" class="section">
       <div class="section-inner">
@@ -98,7 +93,6 @@
         </div>
       </div>
     </section>
-
     <!-- RESOURCES -->
     <section id="resources" class="section">
       <div class="section-inner">
@@ -112,7 +106,6 @@
         </div>
       </div>
     </section>
-
     <!-- CONTACT -->
     <section id="contact" class="section">
       <div class="section-inner">
@@ -144,6 +137,5 @@
         </div>
       </div>
     </section>
-
   </div> <!-- /slider -->
 @endsection

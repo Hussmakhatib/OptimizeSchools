@@ -14,9 +14,11 @@
 /* Reset / base */
 *{box-sizing:border-box}
 html,body{
+  height: 100%;
   margin:0;padding:0;background:var(--bg);color:var(--ink);
   font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial
 }
+body { margin: 0; overflow: hidden; overscroll-behavior: contain; }
 
 /* Smooth anchor jumps; if window scrolls, account for header */
 html{scroll-behavior:smooth; scroll-padding-top: var(--header-h);}
@@ -39,10 +41,11 @@ html{scroll-behavior:smooth; scroll-padding-top: var(--header-h);}
 
 /* ===== Fixed Header (125px) ===== */
 header.site-header{
-  position:fixed; top:0; left:0; right:0; height:var(--header-h);
-  display:flex; align-items:center; background:rgba(246,248,251,.85);
-  backdrop-filter:saturate(180%) blur(10px);
-  border-bottom:1px solid #e9edf3; z-index:1000;
+  position: fixed; top: 0; left: 0; right: 0; height: var(--header-h);
+  display: flex; align-items: center;
+  background: rgba(246,248,251,.85);
+  backdrop-filter: saturate(180%) blur(10px);
+  border-bottom: 1px solid #e9edf3; z-index: 1000;
 }
 .header-inner{
   display:flex; align-items:center; justify-content:space-between;
@@ -59,25 +62,33 @@ header.site-header{
 .navlinks a[aria-current="page"], .navlinks a.is-active{background:#eaf2ff; color:var(--brand)}
 
 /* Push page content below the fixed header */
-.page{padding-top:var(--header-h);}
+.page{
+  padding-top: var(--header-h);
+  height: calc(100vh - var(--header-h));
+  overflow: hidden;
+}
 
 /* ===== Full-height Slider Sections ===== */
 .slider{
-  height: calc(100vh - var(--header-h));
+  height: 100%;
   overflow-y: auto;
   scroll-snap-type: y mandatory;
-  /* NEW: stop sections snapping under the fixed header */
-  scroll-padding-top: var(--header-h);
+  scroll-padding-top: 0; /* snap to the top edge of the slider */
 }
 
 .section{
-  min-height: calc(100vh - var(--header-h));
-  display:flex; align-items:center;
+  min-height: 100%;
+  display: flex;
+  align-items: flex-start;      /* <-- was center */
+  justify-content: flex-start;  /* ensure no extra vertical centering */
   scroll-snap-align: start;
-  padding-block: 24px;
+  padding-block: 24px;          /* small breathing space; set 0 if you want perfectly flush */
 }
 .section .section-inner{width:100%}
-
+/* Cancel the container’s top padding inside sections (so no double top padding) */
+.section .container{ padding-top: 0; }
+/* Utility: only the hero should be vertically centered */
+.section--center{ align-items: center; }
 /* Titles */
 h1{font-size:clamp(28px,4vw,44px);line-height:1.15;margin:0 0 12px}
 h2{font-size:clamp(22px,3vw,32px);margin:0 0 10px}

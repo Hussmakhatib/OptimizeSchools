@@ -1,85 +1,81 @@
 /* ===========================
-   One-Page Slider Helpers
+   One-Page Slider Helpers (slider-only scroll)
    =========================== */
 const $ = (s, ctx=document) => ctx.querySelector(s);
 const $$ = (s, ctx=document) => Array.from(ctx.querySelectorAll(s));
 
 document.addEventListener('DOMContentLoaded', () => {
-  const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 125;
-  const sections = $$('.section[id]');
+  const slider   = $('.slider');                  // the ONLY scrollable container
+  const sections = $$('.section[id]', slider);    // all sections live inside slider
   const navLinks = $$('.navlinks a[href^="#"]');
-  const slider = $('.slider');
 
-  /* 1) Smooth anchor navigation (with header offset safety for browsers ignoring scroll-padding) */
+  if (!slider || sections.length === 0) return;
+
+  /* 1) Smooth anchor navigation INTO the slider (never scroll the window) */
   navLinks.forEach(a => {
     a.addEventListener('click', (e) => {
       const id = a.getAttribute('href');
-      if (!id.startsWith('#')) return;
-      const target = $(id);
+      if (!id || !id.startsWith('#')) return;
+      const target = $(id, slider) || document.querySelector(id);
       if (!target) return;
+
       e.preventDefault();
 
-      const top = target.getBoundingClientRect().top + window.scrollY - headerH + 1;
-      window.scrollTo({ top, behavior: 'smooth' });
+      // Scroll INSIDE the slider only (so header never overlaps)
+      slider.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
 
-      // If slider container is used (recommended), scroll it instead of window:
-      if (slider && slider.contains(target)) {
-        const y = target.offsetTop; // inside slider
-        slider.scrollTo({ top: y, behavior: 'smooth' });
-      }
+      // Update URL fragment without jumping
       history.replaceState(null, '', id);
     });
   });
 
-  /* 2) Highlight active nav link while scrolling */
-  const byId = link => link.getAttribute('href');
+  /* 2) Highlight active nav item while scrolling the slider */
+  const href = (link) => link.getAttribute('href');
   const setActive = (id) => {
-    navLinks.forEach(a => a.classList.toggle('is-active', byId(a) === id));
-    // a11y hint
-    navLinks.forEach(a => a.removeAttribute('aria-current'));
-    const active = navLinks.find(a => byId(a) === id);
-    if (active) active.setAttribute('aria-current', 'page');
+    navLinks.forEach(a => {
+      const match = href(a) === id;
+      a.classList.toggle('is-active', match);
+      if (match) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
   };
 
+  // Observe which section is most visible inside the slider
   const io = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        setActive('#' + entry.target.id);
-      }
+      entry.target.classList.toggle('is-current', entry.isIntersecting);
+      if (entry.isIntersecting) setActive('#' + entry.target.id);
     });
-  }, { root: slider || null, threshold: 0.6 });
+  }, { root: slider, threshold: 0.6 });
+
   sections.forEach(sec => io.observe(sec));
 
-  /* 3) Optional: snap assist on wheel for older browsers (kept subtle) */
-  let lock = false;
+  /* 3) (Optional) gentle snap assist for older browsers
+        Leave disabled by default—enable by uncommenting the snapTo() call below. */
+  let snapping = false;
   const snapTo = (dir) => {
-    if (lock) return; lock = true;
-    const current = sections.find(s => s.classList.contains('is-current')) ||
-                    sections.reduce((closest, s) => {
-                      const b = s.getBoundingClientRect();
-                      return (Math.abs(b.top - headerH) < Math.abs((closest?.getBoundingClientRect().top ?? Infinity) - headerH)) ? s : closest;
-                    }, null);
+    if (snapping) return;
+    snapping = true;
 
-    const idx = sections.indexOf(current);
-    const nextIdx = Math.min(sections.length - 1, Math.max(0, idx + dir));
-    const target = sections[nextIdx];
-    if (target && target !== current) {
-      (slider || window).scrollTo({ top: (slider ? target.offsetTop : target.offsetTop + window.scrollY - headerH), behavior: 'smooth' });
-      setActive('#' + target.id);
-    }
-    setTimeout(() => (lock = false), 450);
+    // Find currently most centered section
+    const mid = slider.scrollTop + slider.clientHeight / 2;
+    let currentIdx = 0, bestDist = Infinity;
+    sections.forEach((s, i) => {
+      const top = s.offsetTop, bottom = top + s.offsetHeight;
+      const center = (top + bottom) / 2;
+      const dist = Math.abs(center - mid);
+      if (dist < bestDist) { bestDist = dist; currentIdx = i; }
+    });
+
+    const nextIdx = Math.min(sections.length - 1, Math.max(0, currentIdx + dir));
+    slider.scrollTo({ top: sections[nextIdx].offsetTop, behavior: 'smooth' });
+    setTimeout(() => (snapping = false), 450);
   };
 
-  // Mark current via IO callback by toggling class
-  const io2 = new IntersectionObserver((entries) => {
-    entries.forEach(e => e.target.classList.toggle('is-current', e.isIntersecting));
-  }, { root: slider || null, threshold: 0.6 });
-  sections.forEach(sec => io2.observe(sec));
-
-  // Only enable snap assist if user is scrolling inside the slider
-  (slider || window).addEventListener('wheel', (e) => {
+  // Wheel handler inside slider (disabled by default)
+  slider.addEventListener('wheel', (e) => {
     if (!e.ctrlKey && Math.abs(e.deltaY) > 28) {
-      // Allow normal free scroll; uncomment for stronger snapping:
+      // Uncomment to enforce one-section-at-a-time scrolling:
+      // e.preventDefault();
       // snapTo(e.deltaY > 0 ? +1 : -1);
     }
   }, { passive: true });
